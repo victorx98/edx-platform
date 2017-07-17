@@ -1,3 +1,44 @@
+// Course call to action message
+.course-message {
+  .message-author {
+    display: inline-block;
+    width: 70px;
+  }
+
+  .message-content {
+    display: inline-block;
+    position: relative;
+    border: 1px solid $lms-border-color;
+    margin: 0 0 20px 10px;
+    padding: 10px 20px;
+    border-radius: 5px;
+
+    &:after, &:before {
+      bottom: 35%;
+      left: 0%;
+      border: solid transparent;
+      height: 0;
+      width: 0;
+      content: " ";
+      position: absolute;
+    }
+
+    &:after {
+      border-color: transparent;
+      border-right-color: $white;
+      border-width: 10px;
+      margin-left: -19px;
+    }
+
+    &:before {
+      border-color: transparent;
+      border-right-color: $lms-border-color;
+      border-width: 10px;
+      margin-left: -20px;
+    }
+  }
+}
+
 // Welcome message
 .welcome-message {
   border: solid 1px $lms-border-color;

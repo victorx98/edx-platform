@@ -4,20 +4,33 @@
 <%namespace name='static' file='../static_content.html'/>
 
 <%!
+from django.conf import settings
 from django.utils.translation import ugettext as _
 from openedx.core.djangolib.js_utils import js_escaped_string
 from openedx.core.djangolib.markup import HTML
+from django.core.urlresolvers import reverse
 %>
 
+<%def name="login_query()">${
+  u"?next={next}".format(
+    next=urlquote_plus(login_redirect_url if login_redirect_url else request.path)
+  ) if (login_redirect_url or request) else ""
+}</%def>
+
 <%block name="content">
-<div class="course-message">
-    <img src="${image_src}"/>
+<div class="course-message grid-manual">
+    <img class="message-author col col-2" src="${static.url(image_src)}"/>
+    <div class="message-content col col-10">
     % if user_access['is_anonymous']:
-        <h1>Sign in or Register here</h1>
+        You must be enrolled in the course to see course content. <a href="/login">${_("Sign in")}</a> or
+        <a href="/register"> ${_("Register")}</a>, and then enroll in this course.
     % elif user_access['is_staff'] or user_access['is_enrolled'] and days_until_start > 0:
-        <h1>${_Course starts in} ${days_until_start} days on ${course_start_date}.</h1>
+        <div>Course starts in ${days_until_start} days on ${course_start_date}.</div>
+        Add a calendar reminder.
     % elif not user_access['is_anonymous'] and not user_access['is_enrolled']:
-        <h1>Enroll Now :)</h1>
+        <div>Welcome to ${course.display_name}!</div>
+        <a href="#">Enroll now</a> to access the full course.
     % endif
+    </div>
 </div>
 </%block>

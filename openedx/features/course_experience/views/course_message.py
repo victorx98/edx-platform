@@ -45,11 +45,15 @@ class CourseMessageFragmentView(EdxFragmentView):
         course_start_date = format_date(course.start, locale=to_locale(get_language()))
         days_until_start = (course.start - datetime.now(UTC())).days if course.start else 0
 
+        # Grab the logo
+        image_src = "course_experience/images/learner-quote2.png"
+
         context = {
             'user_access': user_access,
+            'course': course,
             'course_start_date': course_start_date,
             'days_until_start': days_until_start,
-            'image_src': "logo.png",
+            'image_src': image_src,
         }
 
         html = render_to_string('course_experience/course-message-fragment.html', context)
