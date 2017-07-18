@@ -131,7 +131,7 @@
                         dataDownloadObj.$reports_request_response_error.text(
                             gettext('Error generating proctored exam results. Please try again.')
                         );
-                        return $('.msg-error').css({
+                        return dataDownloadObj.$reports_request_response_error.css({
                             display: 'block'
                         });
                     },
@@ -155,7 +155,7 @@
                         dataDownloadObj.$reports_request_response_error.text(
                             gettext('Error generating survey results. Please try again.')
                         );
-                        return $('.msg-error').css({
+                        return dataDownloadObj.$reports_request_response_error.css({
                             display: 'block'
                         });
                     },
@@ -179,7 +179,7 @@
                         dataDownloadObj.$reports_request_response_error.text(
                             gettext('Error generating student profile information. Please try again.')
                         );
-                        return $('.msg-error').css({
+                        return dataDownloadObj.$reports_request_response_error.css({
                             display: 'block'
                         });
                     },
@@ -201,9 +201,13 @@
                     url: url,
                     error: function() {
                         dataDownloadObj.clear_display();
-                        return dataDownloadObj.$download_request_response_error.text(
+                        dataDownloadObj.$download_request_response_error.text(
                             gettext('Error getting student list.')
                         );
+                        return dataDownloadObj.$download_request_response_error.css({
+                            display: 'block'
+                        });
+
                     },
                     success: function(data) {
                         var $tablePlaceholder, columns, feature, gridData, options;
@@ -251,7 +255,7 @@
                         dataDownloadObj.$reports_request_response_error.text(
                             JSON.parse(error.responseText)
                         );
-                        return $('.msg-error').css({
+                        return dataDownloadObj.$reports_request_response_error.css({
                             display: 'block'
                         });
                     },
@@ -274,7 +278,7 @@
                         dataDownloadObj.$reports_request_response_error.text(
                             gettext('Error generating list of students who may enroll. Please try again.')
                         );
-                        return $('.msg-error').css({
+                        return dataDownloadObj.$reports_request_response_error.css({
                             display: 'block'
                         });
                     },
@@ -294,9 +298,12 @@
                     url: url,
                     error: function() {
                         dataDownloadObj.clear_display();
-                        return dataDownloadObj.$download_request_response_error.text(
+                        dataDownloadObj.$download_request_response_error.text(
                             gettext('Error retrieving grading configuration.')
                         );
+                        return dataDownloadObj.$download_request_response_error.css({
+                            display: 'block'
+                        });
                     },
                     success: function(data) {
                         dataDownloadObj.clear_display();
@@ -326,7 +333,7 @@
                                 gettext('Error generating ORA data report. Please try again.')
                             );
                         }
-                        return $('.msg-error').css({
+                        return dataDownloadObj.$reports_request_response_error.css({
                             display: 'block'
                         });
                     }),
