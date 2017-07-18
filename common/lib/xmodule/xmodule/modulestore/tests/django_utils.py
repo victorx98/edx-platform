@@ -539,6 +539,7 @@ class ModuleStoreTestCase(
         nonstaff_user.save()
         return nonstaff_user, password
 
+    @classmethod
     def update_course(self, course, user_id):
         """
         Updates the version of course in the modulestore

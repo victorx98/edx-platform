@@ -19,14 +19,14 @@ class CourseMessageFragmentView(EdxFragmentView):
     """
     A fragment that displays a course message with an alert and call
     to action for three types of users:
-    
+
     1) Not logged in users are given a link to sign in or register.
     2) Unenrolled users are given a link to enroll.
     3) Enrolled users who get to the page before the course start date
     are given the option to add the start date to their calendar.
-    
+
     This fragment requires a user_access map as follows:
-    
+
     user_access = {
         'is_anonymous': True if the user is logged in, False otherwise
         'is_enrolled': True if the user is enrolled in the course, False otherwise
@@ -44,6 +44,10 @@ class CourseMessageFragmentView(EdxFragmentView):
         # Get time until the start date, if already started, or no start date, value will be zero or negative
         course_start_date = format_date(course.start, locale=to_locale(get_language()))
         days_until_start = (course.start - datetime.now(UTC())).days if course.start else 0
+
+        # Return None if user is enrolled and course has begun
+        if user_access['is_enrolled'] and days_until_start <= 0:
+            return None
 
         # Grab the logo
         image_src = "course_experience/images/learner-quote2.png"
