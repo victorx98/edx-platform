@@ -9,7 +9,7 @@ from datetime import datetime
 import branding
 import pytz
 from courseware.access import has_access
-from courseware.access_response import StartDateError
+from courseware.access_response import StartDateError, MilestoneError
 from courseware.date_summary import (
     CourseEndDate,
     CourseStartDate,
@@ -132,6 +132,10 @@ def check_course_access(course, user, action, check_if_enrolled=False):
                 params=params.urlencode()
             ))
 
+        if isinstance(access_response, MilestoneError):
+            raise CourseAccessRedirect('{dashboard_url}'.format(
+                dashboard_url=reverse('dashboard'),
+            ))
         # Deliberately return a non-specific error message to avoid
         # leaking info about access control settings
         raise CoursewareAccessException(access_response)

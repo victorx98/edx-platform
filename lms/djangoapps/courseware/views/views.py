@@ -739,8 +739,7 @@ def course_about(request, course_id):
 
         show_courseware_link = bool(
             (
-                has_access(request.user, 'load', course) and
-                has_access(request.user, 'view_courseware_with_prerequisites', course)
+                has_access(request.user, 'load', course)
             ) or settings.FEATURES.get('ENABLE_LMS_MIGRATION')
         )
 
@@ -1727,15 +1726,6 @@ def check_access_to_course(request, course):
     """
     Raises Redirect exceptions if the user does not have course access.
     """
-    # TODO: LEARNER-1865: Handle prereqs in new Course Home.
-    # Redirect to the dashboard if not all prerequisites have been met
-    if not has_access(request.user, 'view_courseware_with_prerequisites', course):
-        log.info(
-            u'User %d tried to view course %s '
-            u'without fulfilling prerequisites',
-            request.user.id, unicode(course.id))
-        raise CourseAccessRedirect(reverse('dashboard'))
-
     # TODO: LEARNER-1865: Handle course surveys in new Course Home.
     # Redirect if the user must answer a survey before entering the course.
     if must_answer_survey(course, request.user):
