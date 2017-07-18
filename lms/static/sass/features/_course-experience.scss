@@ -2,15 +2,26 @@
 .course-message {
   .message-author {
     display: inline-block;
-    width: 70px;
+    width: $baseline*7/2;
+    border-radius: $baseline*7/4;
+    border: 1px solid $lms-border-color;
+
+    @media (max-width: 880px) {
+      display: none;
+    }
   }
 
   .message-content {
     position: relative;
     border: 1px solid $lms-border-color;
-    margin: 0 0 20px 10px;
-    padding: 10px 20px;
-    border-radius: 5px;
+    margin: 0 0 $baseline/2 $baseline;
+    padding: $baseline/2 $baseline;
+    border-radius: $baseline/4;
+
+    @media (max-width: 880px) {
+      width: 100%;
+      margin: $baseline 0;
+    }
 
     &:after, &:before {
       bottom: 35%;
@@ -20,20 +31,34 @@
       width: 0;
       content: " ";
       position: absolute;
+
+      @media (max-width: 880px) {
+        display: none;
+      }
     }
 
     &:after {
       border-color: transparent;
       border-right-color: $white;
-      border-width: 10px;
-      margin-left: -19px;
+      border-width: $baseline/2;
+      margin-left: $baseline*-1 + 1;
     }
 
     &:before {
       border-color: transparent;
       border-right-color: $lms-border-color;
-      border-width: 10px;
-      margin-left: -20px;
+      border-width: $baseline/2;
+      margin-left: $baseline*-1;
+    }
+
+    .message_header {
+      font-weight: $font-semibold;
+      margin-bottom: $baseline/4;
+    }
+
+    a {
+      font-weight: $font-semibold;
+      text-decoration: underline;
     }
   }
 }

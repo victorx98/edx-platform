@@ -2,7 +2,7 @@
 View logic for handling course messages.
 """
 
-from babel.dates import format_date
+from babel.dates import format_date, format_timedelta
 from datetime import datetime
 
 from courseware.courses import get_course_with_access
@@ -42,21 +42,25 @@ class CourseMessageFragmentView(EdxFragmentView):
         course = get_course_with_access(request.user, 'load', course_key)
 
         # Get time until the start date, if already started, or no start date, value will be zero or negative
+        now = datetime.now(UTC())
+        delta = course.start - now
         course_start_date = format_date(course.start, locale=to_locale(get_language()))
-        days_until_start = (course.start - datetime.now(UTC())).days if course.start else 0
+        already_started = course.start and (course.start - now).days <= 0
+        days_until_start_string = "started" if already_started else format_timedelta(delta, locale=to_locale(get_language()))
 
         # Return None if user is enrolled and course has begun
-        if user_access['is_enrolled'] and days_until_start <= 0:
+        if user_access['is_enrolled'] and already_started:
             return None
 
         # Grab the logo
-        image_src = "course_experience/images/learner-quote2.png"
+        image_src = "course_experience/images/xsy_circle.png"
 
         context = {
             'user_access': user_access,
             'course': course,
             'course_start_date': course_start_date,
-            'days_until_start': days_until_start,
+            'days_until_start_string': days_until_start_string,
+            'already_started': already_started,
             'image_src': image_src,
         }
 

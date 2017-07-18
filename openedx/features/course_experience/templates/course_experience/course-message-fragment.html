@@ -5,31 +5,48 @@
 
 <%!
 from django.conf import settings
+from django.utils.http import urlquote_plus
 from django.utils.translation import ugettext as _
 from openedx.core.djangolib.js_utils import js_escaped_string
 from openedx.core.djangolib.markup import HTML
 from django.core.urlresolvers import reverse
 %>
 
-<%def name="login_query()">${
-  u"?next={next}".format(
-    next=urlquote_plus(login_redirect_url if login_redirect_url else request.path)
-  ) if (login_redirect_url or request) else ""
-}</%def>
-
 <%block name="content">
 <div class="course-message grid-manual">
     <img class="message-author col col-2" src="${static.url(image_src)}"/>
     <div class="message-content col col-10">
     % if user_access['is_anonymous']:
-        You must be enrolled in the course to see course content. <a href="/login">${_("Sign in")}</a> or
-        <a href="/register"> ${_("Register")}</a>, and then enroll in this course.
-    % elif user_access['is_staff'] or user_access['is_enrolled'] and days_until_start > 0:
-        <div>Course starts in ${days_until_start} days on ${course_start_date}.</div>
-        Add a calendar reminder.
-    % elif not user_access['is_anonymous'] and not user_access['is_enrolled']:
-        <div>Welcome to ${course.display_name}!</div>
-        <a href="#">Enroll now</a> to access the full course.
+        ${HTML(_(
+            "<div class='message_header'>You must be enrolled in the course to see course content.</div>"
+            " {sign_in_link} or {register_link} and then enroll in this course."
+        ).format(
+            sign_in_link=HTML("<a href='/login?next={current_url}'>{sign_in_label}</a>").format(
+                sign_in_label=_("Sign in"),
+                current_url=urlquote_plus(request.path),
+            ),
+            register_link=HTML("<a href=''/register?next={current_url}'>{register_label}</a>").format(
+                register_label=_("register"),
+                current_url=urlquote_plus(request.path),
+            )
+        ))}
+    % endif
+    % if not user_access['is_anonymous'] and not user_access['is_enrolled']:
+        ${HTML(_(
+            "<div class='message_header'>Welcome to {course_display_name}</div><a class='enroll_link' href='#'> Enroll now</a>"
+            " to access the full course."
+        ).format(
+            course_display_name=course.display_name,
+        ))}
+    % endif
+    % if (user_access['is_staff'] or user_access['is_enrolled']) and not already_started:
+        ${HTML(_(
+            "<div class='message_header'>Course starts in {days_until_start_string} on {course_start_date}.</div>"
+            "<a class='add_calendar_reminder' href='#'>Add a calendar reminder</a>."
+        ).format(
+            days_until_start_string=days_until_start_string,
+            course_start_date=course_start_date,
+        ))}
     % endif
     </div>
 </div>
