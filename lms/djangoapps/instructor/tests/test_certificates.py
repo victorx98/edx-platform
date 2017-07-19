@@ -341,7 +341,7 @@ class CertificatesInstructorApiTest(SharedModuleStoreTestCase):
         )
 
         message_queue_error = 'Error occured. Please try again later'
-        with patch('lms.djangoapps.instructor_task.api.generate_certificates_for_students') as submit_task_function:
+        with mock.patch('lms.djangoapps.instructor_task.api.generate_certificates_for_students') as submit_task_function:
             error = QueueConnectionError()
             submit_task_function.side_effect = error
             response = self.client.post(url, {})
@@ -401,7 +401,7 @@ class CertificatesInstructorApiTest(SharedModuleStoreTestCase):
         url = reverse('start_certificate_regeneration', kwargs={'course_id': unicode(self.course.id)})
         message_queue_error = 'Error occured. Please try again later'
 
-        with patch('lms.djangoapps.instructor_task.api.regenerate_certificates') as submit_task_function:
+        with mock.patch('lms.djangoapps.instructor_task.api.regenerate_certificates') as submit_task_function:
             error = QueueConnectionError()
             submit_task_function.side_effect = error
             response = self.client.post(url, data={'certificate_statuses': [CertificateStatuses.downloadable]})
@@ -946,7 +946,7 @@ class GenerateCertificatesInstructorApiTest(SharedModuleStoreTestCase):
         )
         message_queue_error = 'Error occured. Please try again later'
 
-        with patch('lms.djangoapps.instructor_task.api.generate_certificates_for_students') as submit_task_function:
+        with mock.patch('lms.djangoapps.instructor_task.api.generate_certificates_for_students') as submit_task_function:
             error = QueueConnectionError()
             submit_task_function.side_effect = error
             response = self.client.post(
