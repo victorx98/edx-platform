@@ -7,8 +7,8 @@ from collections import OrderedDict
 from django.contrib.auth.models import User
 from django.test.client import Client
 
+from courseware.access import is_survey_required_for_course, must_answer_survey
 from survey.models import SurveyForm
-from survey.utils import is_survey_required_for_course, must_answer_survey
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 from xmodule.modulestore.tests.factories import CourseFactory
 

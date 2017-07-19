@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 
 import analytics
 import shoppingcart
-import survey.utils
 import survey.views
 import waffle
 from certificates import api as certs_api
@@ -91,7 +90,6 @@ from openedx.features.enterprise_support.api import data_sharing_consent_require
 from rest_framework import status
 from shoppingcart.utils import is_shopping_cart_enabled
 from student.models import CourseEnrollment, UserTestGroup
-from survey.utils import must_answer_survey
 from util.cache import cache, cache_if_anonymous
 from util.db import outer_atomic
 from util.milestones_helpers import get_prerequisite_courses_display
