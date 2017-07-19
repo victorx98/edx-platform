@@ -40,14 +40,12 @@
     &:after {
       @include border-right-color($white);
       @include margin-left($baseline*-1+1);
-      border-color: transparent;
       border-width: $baseline/2;
     }
 
     &:before {
       @include margin-left($baseline*-1);
       @include border-right-color($lms-border-color);
-      border-color: transparent;
       border-width: $baseline/2;
     }
 

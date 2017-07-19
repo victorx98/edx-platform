@@ -28,16 +28,16 @@ is_rtl = get_language_bidi()
             ${HTML(_(
                 "<div class='message_header'>You must be enrolled in the course to see course content.</div>"
                 " {sign_in_link} or {register_link} and then enroll in this course."
-            ).format(
+            )).format(
                 sign_in_link=HTML("<a href='/login?next={current_url}'>{sign_in_label}</a>").format(
                     sign_in_label=_("Sign in"),
                     current_url=urlquote_plus(request.path),
                 ),
-                register_link=HTML("<a href=''/register?next={current_url}'>{register_label}</a>").format(
+                register_link=HTML("<a href='/register?next={current_url}'>{register_label}</a>").format(
                     register_label=_("register"),
                     current_url=urlquote_plus(request.path),
                 )
-            ))}
+            )}
         </div>
     </div>
 % endif
@@ -50,9 +50,9 @@ is_rtl = get_language_bidi()
             ${HTML(_(
                 "<div class='message_header'>Welcome to {course_display_name}</div><a class='enroll_link' href='#'> Enroll now</a>"
                 " to access the full course."
-            ).format(
+            )).format(
                 course_display_name=course.display_name,
-            ))}
+            )}
         </div>
     </div>
 % endif
@@ -65,10 +65,10 @@ is_rtl = get_language_bidi()
             ${HTML(_(
                 "<div class='message_header'>Course starts in {days_until_start_string} on {course_start_date}.</div>"
                 "<a class='add_calendar_reminder' href='#'>Add a calendar reminder</a>."
-            ).format(
+            )).format(
                 days_until_start_string=days_until_start_string,
                 course_start_date=course_start_date,
-            ))}
+            )}
         </div>
     </div>
 % endif
