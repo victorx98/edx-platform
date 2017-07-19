@@ -12,10 +12,18 @@ from openedx.core.djangolib.markup import HTML
 from django.core.urlresolvers import reverse
 %>
 
+<%
+# set doc language direction
+from django.utils.translation import get_language_bidi
+is_rtl = get_language_bidi()
+%>
+
 <%block name="content">
 <div class="course-message grid-manual">
+    % if not is_rtl
     <img class="message-author col col-2" src="${static.url(image_src)}"/>
-    <div class="message-content col col-10">
+    % endif
+    <div class="message-content col ${'col-12' if is_rtl else 'col-10'}">
     % if user_access['is_anonymous']:
         ${HTML(_(
             "<div class='message_header'>You must be enrolled in the course to see course content.</div>"
