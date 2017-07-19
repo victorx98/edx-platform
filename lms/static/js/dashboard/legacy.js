@@ -105,19 +105,48 @@
          });
 
          $('.action-unenroll').click(function(event) {
+
              var element = $(event.target);
-             var track_info = element.data('track-info');
+
+             var can_unenroll = $('#course-context-data').attr('data-course_can_unenroll');
+             var is_paid_course = $('#course-context-data').attr('data-course_is_paid_course');
+             var is_course_blocked = $('#course-context-data').attr('data-course_is_course_blocked');
+             var cert_name_long = $('#course-context-data').attr('data-course_cert_name_long');
+             var enrollment_mode = $('#course-context-data').attr('data-course_enrollment_mode');
+
+             var course_id = element.data('course_id');
              var course_number = element.data('course-number');
              var course_name = element.data('course-name');
-             var cert_name_long = element.data('cert-name-long');
-             $('#track-info').html(interpolate(track_info, {
+
+             var show_refund_option = "";
+
+             request = $.ajax({
+                      url: "/get_course_refund_status/?course_id"+course_id,
+                      method: "GET",
+                      dataType: "json"
+                    });
+
+                request.success(function( data ) {
+                    show_refund_option = data.course_refundable_status;
+                });
+                request.fail(function( jqXHR, textStatus ) {
+                    console.log(jqXHR);
+                });
+
+             var dialog_message_attr = set_dialog_attributes(can_unenroll, is_paid_course, is_course_blocked, cert_name_long,
+                                    course_number, course_name, enrollment_mode, show_refund_option);
+
+             $('#track-info').html(interpolate(dialog_message_attr['data_track_info'], {
                  course_number: "<span id='unenroll_course_number'>" + course_number + '</span>',
                  course_name: "<span id='unenroll_course_name'>" + course_name + '</span>',
                  cert_name_long: "<span id='unenroll_cert_name'>" + cert_name_long + '</span>'
              }, true));
-             $('#refund-info').html(element.data('refund-info'));
+
+             if (dialog_message_attr['data_refund_info'])
+                $('#refund-info').html(dialog_message_attr['data_refund_info']);
              $('#unenroll_course_id').val(element.data('course-id'));
              edx.dashboard.dropdown.toggleCourseActionsDropdownMenu(event);
+
          });
 
          $('#unenroll_form').on('ajax:complete', function(event, xhr) {
@@ -181,5 +210,84 @@
              $('#unenroll_course_number').text($(event.target).data('course-number'));
              $('#unenroll_course_name').text($(event.target).data('course-name'));
          });
+
+
+         function set_dialog_attributes(can_unenroll, is_paid_course, is_course_blocked, cert_name_long, course_number,
+                                        course_name, enrollment_mode, show_refund_option){
+
+             if (can_unenroll) {
+                 if (is_paid_course && show_refund_option) {
+                     if (!is_course_blocked) {
+                         return {
+                          'data-track-info': "Are you sure you want to unenroll from the purchased course "+ course_name + "s " + course_number + "s?",
+                          'data-refund-info': "You will be refunded the amount you paid."
+                         }
+                     }
+                     else {
+                         return {
+                          'data-track-info': "Are you sure you want to unenroll from the purchased course" + course_name + "s " + course_number + "s?",
+                          'data-refund-info': "You will be refunded the amount you paid."
+                          }
+                     }
+                 }
+                 else if (is_paid_course && !show_refund_opt){
+                     if (!is_course_blocked) {
+                         return {
+                          'data-track-info': "Are you sure you want to unenroll from the purchased course" + course_name + "s " + course_number + "s?",
+                          'data-refund-info': "You will not be refunded the amount you paid."
+                         }
+                     }
+                     else{
+                         return {
+                          'data-track-info': "Are you sure you want to unenroll from the purchased course" + course_name + "s " + course_number + "s?",
+                          'data-refund-info': "You will not be refunded the amount you paid."
+                         }
+                     }
+                 }
+                 else{
+                    if (enrollment_mode != "verified") {
+                        if (!is_course_blocked) {
+                            return {
+                              'data-track-info': "Are you sure you want to unenroll from"+ course_name+"s "+ course_number + "s?",
+                            }
+                        }
+                        else {
+                            return {
+                              'data-track-info':"Are you sure you want to unenroll from"+ course_name+"s "+ course_number + "s?",
+                            }
+                        }
+                     }
+                else if (show_refund_option){
+                         if (!is_course_blocked){
+                             return {
+                                'data-track-info':"Are you sure you want to unenroll from the verified"+ cert_name_long+"s track of" + course_name + "s" + course_number + "s?",
+                                'data-refund-info': "You will be refunded the amount you paid.",
+                             }
+                         }
+                         else{
+                            return {
+                              'data-track-info':"Are you sure you want to unenroll from the verified"+ cert_name_long+"s track of" + course_name+"s" + course_number + "s?",
+                               'data-refund-info': "You will be refunded the amount you paid.",
+                            }
+                         }
+                    }
+                else{
+                         if (!is_course_blocked){
+                            return {
+                                'data-track-info':"Are you sure you want to unenroll from the verified"+ cert_name_long+"s track of" + course_name+"s" + course_number + "s?",
+                                'data-refund-info':"The refund deadline for this course has passed, so you will not receive a refund."
+                            }
+
+                         }
+                         else{
+                            return {
+                              'data-track-info':"Are you sure you want to unenroll from the verified"+ cert_name_long+"s track of" + course_name+ "s" + course_number + "s?",
+                                'data-refund-info':"The refund deadline for this course has passed, so you will not receive a refund."
+                            }
+                         }
+                    }
+                 }
+            }
+         }
      };
  })(jQuery, gettext, Logger, accessible_modal, interpolate);
