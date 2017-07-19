@@ -43,6 +43,7 @@ class RequireJSPathOverridesTest(TestCase):
 class PipelineRenderTest(TestCase):
     """Test individual pipeline rendering functions. """
 
+    @skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Test only valid in LMS')
     @classmethod
     def setUpClass(cls):
         """

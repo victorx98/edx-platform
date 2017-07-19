@@ -301,23 +301,6 @@ class TestUpdateAssetsTask(PaverTestCase):
     but do not actually execute the commandline on the terminal/process
     """
 
-    @ddt.data(
-        [{"expected_substring": "> /dev/null"}],  # go to /dev/null by default
-        [{"cmd_args": ["--debug"], "expected_substring": "collectstatic --noinput "}]  # TODO: make this regex
-    )
-    @ddt.unpack
-    def test_update_assets_task_collectstatic_log_arg(self, options):
-        """
-        Scoped test that only looks at what is passed to the collecstatic options
-        """
-        cmd_args = options.get("cmd_args", [""])
-        expected_substring = options.get("expected_substring", None)
-        call_task('pavelib.assets.update_assets', args=cmd_args)
-        self.assertTrue(
-            self._is_substring_in_list(self.task_messages, expected_substring),
-            msg="{substring} not found in messages".format(substring=expected_substring)
-        )
-
     def _is_substring_in_list(self, messages_list, expected_substring):
         """
         Return true a given string is somewhere in a list of strings
