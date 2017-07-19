@@ -21,3 +21,24 @@ class VideoUploadConfig(ConfigurationModel):
 
 class PushNotificationConfig(ConfigurationModel):
     """Configuration for mobile push notifications."""
+
+
+class MigrateVerifiedTrackCohortsSetting(ConfigurationModel):
+    """
+    ...
+    """
+    class Meta(object):
+        app_label = "contentstore"
+
+    course_id = TextField(
+        blank=False,
+        help_text="Course key for which to compute grades."
+    )
+    audit_cohort_names = TextField(
+        help_text="Comma-separated list of audit cohort names"
+    )
+
+    @classmethod
+    def get_audit_course_names(cls):
+        """get the list of audit course names for the course"""
+        return [course_name for course_name in cls.current().audit_course_names.split(",") if course_name]
