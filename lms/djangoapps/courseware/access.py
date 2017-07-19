@@ -819,6 +819,7 @@ def is_survey_required_for_course(course_descriptor):
     return course_descriptor.course_survey_required and \
         SurveyForm.get(course_descriptor.course_survey_name, throw_if_not_found=False)
 
+
 def must_answer_survey(user, course_descriptor):
     """
     Returns whether a user needs to answer a required survey
@@ -842,6 +843,7 @@ def must_answer_survey(user, course_descriptor):
         return ACCESS_GRANTED
     if not answered_survey:
         return SurveyIncompleteError()
+
 
 def is_mobile_available_for_user(user, descriptor):
     """

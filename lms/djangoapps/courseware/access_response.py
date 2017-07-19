@@ -145,4 +145,3 @@ class SurveyIncompleteError(AccessError):
         developer_message = "The learner has not completed the course survey."
         user_message = _("You must complete the course survey before accessing the course.")
         super(SurveyIncompleteError, self).__init__(error_code, developer_message, user_message)
-
