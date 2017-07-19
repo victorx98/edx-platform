@@ -816,7 +816,7 @@ def is_survey_required_for_course(course_descriptor):
     # check to see that the Survey name has been defined in the CourseDescriptor
     # and that the specified Survey exists
 
-    return course_descriptor.course_survey_required and \
+    return getattr(course_descriptor, 'course_survey_required', False) and \
         SurveyForm.get(course_descriptor.course_survey_name, throw_if_not_found=False)
 
 
@@ -824,6 +824,7 @@ def must_answer_survey(user, course_descriptor):
     """
     Returns whether a user needs to answer a required survey
     """
+
     if not is_survey_required_for_course(course_descriptor):
         return False
 
