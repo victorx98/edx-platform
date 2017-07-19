@@ -39,6 +39,6 @@ class MigrateVerifiedTrackCohortsSetting(ConfigurationModel):
     )
 
     @classmethod
-    def get_audit_course_names(cls):
-        """get the list of audit course names for the course"""
-        return [course_name for course_name in cls.current().audit_course_names.split(",") if course_name]
+    def get_audit_cohort_names(cls):
+        """Get the list of audit course names for the course"""
+        return [cohort_name for cohort_name in cls.current().audit_cohort_names.split(",") if cohort_name]
