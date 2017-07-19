@@ -14,7 +14,7 @@
   .message-content {
     position: relative;
     border: 1px solid $lms-border-color;
-    margin: 0 0 $baseline/2 $baseline;
+    margin: 0 $baseline $baseline/2;
     padding: $baseline/2 $baseline;
     border-radius: $baseline/4;
 
@@ -24,8 +24,8 @@
     }
 
     &:after, &:before {
+      @include left(0%);
       bottom: 35%;
-      left: 0%;
       border: solid transparent;
       height: 0;
       width: 0;
@@ -38,17 +38,17 @@
     }
 
     &:after {
+      @include border-right-color($white);
+      @include margin-left($baseline*-1+1);
       border-color: transparent;
-      border-right-color: $white;
       border-width: $baseline/2;
-      margin-left: $baseline*-1 + 1;
     }
 
     &:before {
+      @include margin-left($baseline*-1);
+      @include border-right-color($lms-border-color);
       border-color: transparent;
-      border-right-color: $lms-border-color;
       border-width: $baseline/2;
-      margin-left: $baseline*-1;
     }
 
     .message_header {
