@@ -4,8 +4,8 @@
 // Please list the ticket number of the experiment
 
 // --------------------
-// LEARNER-1312 Track Selection V2
-/* This css was added as part of the LEARNER-1312 experiment */
+// LEARNER-1726 Track Selection V2
+/* This css was added as part of the LEARNER-1726 experiment */
 .v2.register-choice {
     margin: 0 2% 20px 0 !important
 }
@@ -73,6 +73,9 @@
     .v2.register-choice-view {
         width: 100%;
     }
+    .v2.register-choice-donate {
+        border-color: #D7548E !important;
+    }
     .v2 .wrapper-copy-inline {
         max-height: 115px;
     }
@@ -90,18 +93,48 @@
     .v2 .wrapper-copy-inline .wrapper-copy {
         width: 100% !important;
     }
-    .v2 .donation-link, .v2 input {
-        width: 100% !important;
+    .v2 input, .v2 button {
         font-size: 15px !important;
+    }
+    .v2 button {
+        background-color: rgb(0, 103, 0);
+        border-color: rgb(0, 103, 0);
+        border-radius: 2px;
+        box-shadow: rgb(0, 77, 0) 0px 2px 1px 0px;
+        cursor: pointer;
+        font-family: "Open Sans";
+        height: auto;
+        margin-right: 4px;
+        margin-top: 0px;
+        padding: 10px 15px;
+        width: initial;
+        background-image: none;
+        font-size: 14px;
+    }
+    .savings-message {
+        font-size: 13px;
+        margin-left: 10px;
+    }
+    .v2 .donation-link, .v2 input, .v2 button {
+        width: 100%;
     }
     .v2 img {
         display: none;
+    }
+    .v2 .deco-divider {
+        display: none;
+    }
+}
+@media (min-width: 420px) {
+    .v2 button {
+        font-size: 15px;
+        height: 45px;
     }
 }
 @media (min-width: 768px) {
     .v2.register-choice-certificate,
     .v2.register-choice-donate {
-        width: 48% !important;
+        width: 46.5% !important;
         display: inline-block;
         min-height: 250px;
     }
@@ -116,11 +149,17 @@
         text-align: right !important;
     }
     .v2 .wrapper-copy-inline .wrapper-copy {
-        width: 58% !important;
+        width: 100% !important;
     }
-    .v2 .donation-link, .v2 input {
+    .v2 input, .v2 button {
         font-size: 15px !important;
-        width: 55% !important;
+    }
+    .v2 .donation-link, .v2.register-choice-certificate button {
+        margin-top: 20px;
+        width: initial;
+    }
+    .v2.register-choice-v2-audit input {
+        width: 100% !important;
     }
     .v2.register-choice-view {
         height: 250px;
@@ -130,17 +169,6 @@
     }
     .v2.register-choice {
         margin: 0 2% 20px 0;
-    }
-
-    .v2.deco-divider {
-        width: 3% !important;
-        box-sizing: border-box;
-        float: left;
-        display: inline-block;
-        height: 400px;
-        margin: 0px 0 40px 0 !important;
-        border-left: 4px solid #f5f5f5 !important;
-        border-top: none !important;
     }
 }
 
@@ -206,9 +234,6 @@
     .v2.register-choice .copy-inline {
         width: 100%;
     }
-    .v2.register-choice-donate {
-        border-color: #D7548E !important;
-    }
     .v2 .register-choice-view {
         border-color: #2991c3 !important;
     }
@@ -221,9 +246,15 @@
     }
     .v2 .img-certificate {
         border: 2px solid #009b00 !important;
+        float: right;
+        margin-top: -15px;
+        display: none;
     }
     .v2 .img-donate {
+        margin-top: 0;
+        float: right;
         border: 2px solid #D7548E !important;
+        display: none;
     }
     .v2 .img-view {
         border: 2px solid #2991c3 !important;
@@ -236,13 +267,47 @@
         border: 1px solid transparent !important;
         border-radius: 3px;
     }
-    .v2.register-choice.register-choice-view .action-select input {
+    .v2.register-choice.register-choice-view .action-select button {
         border: 1px solid transparent !important;
     }
     .v2.register-choice.register-choice-view .action-select:hover {
         border: 1px solid #0075b4 !important;
     }
     .v2.deco-divider {
-        display: none !important;
+        width: 3% !important;
+        box-sizing: border-box;
+        float: left;
+        display: inline-block;
+        height: 250px;
+        margin: 0px 0 40px 0 !important;
+        border-left: 4px solid #f5f5f5 !important; border-top:none !important;
+    }
+
+    .v2.deco-divider .copy {
+        position: absolute;
+        top: 110px !important;
+        left: calc(50% - 40px) !important;
+        margin-left: 20px;
+        background: white;
+        text-align: center;
+        color: #474747;
+        width: 10px;
+        padding: 0 !important;
+    }
+}
+@media (min-width: 1024px) {
+    .v2 .donation-link {
+        width: 55%;
+    }
+    .v2.deco-divider .copy {
+        margin-left: 15px;
+    }
+}
+@media (min-width: 1106px) {
+    .v2 .img-certificate, .v2 .img-donate {
+        display: initial;
+    }
+    .v2 .donation-link, .v2.register-choice-certificate button {
+        margin-top: -22px !important;
     }
 }
