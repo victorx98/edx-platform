@@ -1,3 +1,4 @@
+from contentstore.course_group_config import GroupConfiguration
 from course_modes.models import CourseMode
 from django.core.management.base import BaseCommand, CommandError
 from opaque_keys import InvalidKeyError
@@ -12,6 +13,7 @@ from openedx.core.djangoapps.verified_track_content.models import VerifiedTrackC
 from xmodule.modulestore import ModuleStoreEnum
 from xmodule.modulestore.django import modulestore
 from xmodule.partitions.partitions import ENROLLMENT_TRACK_PARTITION_ID
+from xmodule.partitions.partitions_service import PartitionService
 
 
 class Command(BaseCommand):
@@ -133,3 +135,34 @@ class Command(BaseCommand):
                     item.group_access = {ENROLLMENT_TRACK_PARTITION_ID: enrollment_track_group_access}
                     module_store.update_item(item, ModuleStoreEnum.UserID.mgmt_command)
                     module_store.publish(item.location, ModuleStoreEnum.UserID.mgmt_command)
+
+        partitions_to_delete = random_audit_course_user_group_partition_groups
+        partitions_to_delete.append(verified_course_user_group_partition_group)
+
+        # Check if we should delete any partition groups,
+        # Taken from contentstore/views/course.py.remove_content_or_experiment_group
+        if partitions_to_delete:
+            partition_service = PartitionService(course_key)
+            course = partition_service.get_course()
+            for partition_to_delete in partitions_to_delete:
+                # Get the user partition, and the index of that partition in the course
+                partition = partition_service.get_user_partition(partition_to_delete.partition_id)
+                partition_index = course.user_partitions.index(partition)
+                group_id = int(partition_to_delete.group_id)
+
+                # Sanity check to verify that all of the groups being deleted are empty,
+                # since they should have been converted to use enrollment tracks instead
+                usages = GroupConfiguration.get_partitions_usage_info(module_store, course)
+                used = group_id in usages
+                if used:
+                    raise("Content group %s is in use and cannot be deleted." % partition_to_delete.group_id)
+
+                # Remove the groups that match the group ID of the partition to be deleted
+                matching_groups = [group for group in partition.groups if group.id == group_id]
+                if matching_groups:
+                    group_index = partition.groups.index(matching_groups[0])
+                    partition.groups.pop(group_index)
+
+                # Update the course user partition with the updated groups
+                course.user_partitions[partition_index] = partition
+                module_store.update_item(course, ModuleStoreEnum.UserID.mgmt_command)
