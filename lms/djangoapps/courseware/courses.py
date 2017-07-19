@@ -9,7 +9,7 @@ from datetime import datetime
 import branding
 import pytz
 from courseware.access import has_access
-from courseware.access_response import StartDateError, MilestoneError
+from courseware.access_response import StartDateError, MilestoneError, SurveyIncompleteError
 from courseware.date_summary import (
     CourseEndDate,
     CourseStartDate,
@@ -132,10 +132,15 @@ def check_course_access(course, user, action, check_if_enrolled=False):
                 params=params.urlencode()
             ))
 
+        # Redirect if the user must answer a survey before entering the course.
         if isinstance(access_response, MilestoneError):
             raise CourseAccessRedirect('{dashboard_url}'.format(
                 dashboard_url=reverse('dashboard'),
             ))
+        # Redirect if the user must answer a survey before entering the course.
+        if isinstance(access_response, SurveyIncompleteError):
+            raise CourseAccessRedirect(reverse('course_survey', args=[unicode(course.id)]))
+
         # Deliberately return a non-specific error message to avoid
         # leaking info about access control settings
         raise CoursewareAccessException(access_response)

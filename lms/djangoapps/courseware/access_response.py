@@ -137,3 +137,12 @@ class MobileAvailabilityError(AccessError):
         developer_message = "Course is not available on mobile for this user"
         user_message = _("You do not have access to this course on a mobile device")
         super(MobileAvailabilityError, self).__init__(error_code, developer_message, user_message)
+
+
+class SurveyIncompleteError(AccessError):
+    def __init__(self):
+        error_code = "survey_incomplete"
+        developer_message = "The learner has not completed the course survey."
+        user_message = _("You must complete the course survey before accessing the course.")
+        super(SurveyIncompleteError, self).__init__(error_code, developer_message, user_message)
+

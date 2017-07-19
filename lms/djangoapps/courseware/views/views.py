@@ -278,10 +278,6 @@ def course_info(request, course_id):
         if not user_is_enrolled and not can_self_enroll_in_course(course_key):
             return redirect(reverse('dashboard'))
 
-        # TODO: LEARNER-1865: Handle prereqs and course survey in new Course Home.
-        # Redirect the user if they are not yet allowed to view this course
-        check_access_to_course(request, course)
-
         # LEARNER-170: Entrance exam is handled by new Course Outline. (DONE)
         # If the user needs to take an entrance exam to access this course, then we'll need
         # to send them to that specific course module before allowing them into other areas
@@ -424,9 +420,6 @@ class CourseTabView(EdxFragmentView):
         with modulestore().bulk_operations(course_key):
             course = get_course_with_access(request.user, 'load', course_key)
             try:
-                # Verify that the user has access to the course
-                check_access_to_course(request, course)
-
                 # Show warnings if the user has limited access
                 self.register_user_access_warning_messages(request, course_key)
 
@@ -919,9 +912,6 @@ def _progress(request, course_key, student_id):
 
     # NOTE: To make sure impersonation by instructor works, use
     # student instead of request.user in the rest of the function.
-
-    # Redirect the user if they are not yet allowed to view this course
-    check_access_to_course(request, course)
 
     # The pre-fetching of groups is done to make auth checks not require an
     # additional DB lookup (this kills the Progress page in particular).
@@ -1720,13 +1710,3 @@ def get_financial_aid_courses(user):
             )
 
     return financial_aid_courses
-
-
-def check_access_to_course(request, course):
-    """
-    Raises Redirect exceptions if the user does not have course access.
-    """
-    # TODO: LEARNER-1865: Handle course surveys in new Course Home.
-    # Redirect if the user must answer a survey before entering the course.
-    if must_answer_survey(course, request.user):
-        raise CourseAccessRedirect(reverse('course_survey', args=[unicode(course.id)]))
