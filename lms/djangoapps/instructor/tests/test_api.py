@@ -198,6 +198,8 @@ INSTRUCTOR_POST_ENDPOINTS = set([
     'spent_registration_codes',
     'students_update_enrollment',
     'update_forum_role_membership',
+    'get_course_survey_results',
+    'problem_grade_report',
 ])
 
 
@@ -291,18 +293,22 @@ class TestCommonExceptions400(TestCase):
         result = json.loads(resp.content)
         self.assertIn("Task is already running", result["error"])
 
-    def test_queue_connection_error(self):
-        self.request.is_ajax.return_value = False
+    @ddt.data(True, False)
+    def test_queue_connection_error(self, is_ajax):
+        self.request.is_ajax.return_value = is_ajax
         resp = view_queue_connection_error(self.request)  # pylint: disable=assignment-from-no-return
         self.assertEqual(resp.status_code, 400)
         self.assertIn('Error occured. Please try again later', resp.content)
 
-    def test_queue_connection_error_ajax(self):
-        self.request.is_ajax.return_value = True
-        resp = view_queue_connection_error(self.request)  # pylint: disable=assignment-from-no-return
-        self.assertEqual(resp.status_code, 400)
-        result = json.loads(resp.content)
-        self.assertIn('Error occured. Please try again later', resp.content)
+    # Need to check if ddt.data does the trick
+
+
+    # def test_queue_connection_error_ajax(self):
+    #     self.request.is_ajax.return_value = True
+    #     resp = view_queue_connection_error(self.request)  # pylint: disable=assignment-from-no-return
+    #     self.assertEqual(resp.status_code, 400)
+    #     result = json.loads(resp.content)
+    #     self.assertIn('Error occured. Please try again later', resp.content)
 
 
 @attr(shard=1)
@@ -420,6 +426,7 @@ class TestInstructorAPIDenyLevels(SharedModuleStoreTestCase, LoginEnrollmentTest
             ('get_proctored_exam_results', {}),
             ('get_problem_responses', {}),
             ('export_ora2_data', {}),
+
         ]
         # Endpoints that only Instructors can access
         self.instructor_level_endpoints = [
@@ -2734,6 +2741,44 @@ class TestInstructorAPILevelsDataDump(SharedModuleStoreTestCase, LoginEnrollment
         self.assertIn(message_queue_error, response.content)
 
 
+    def test_problem_grade_report_queue_connection_error(self):
+        """
+        write doc
+        :return:
+        """
+        url = reverse(
+            'problem_grade_report',
+            kwargs={'course_id': unicode(self.course.id)}
+        )
+
+        message_queue_error = 'Error occured. Please try again later'
+        with patch('lms.djangoapps.instructor_task.api.submit_problem_grade_report') as submit_task_function:
+            error = QueueConnectionError()
+            submit_task_function.side_effect = error
+            response = self.client.post(url, {})
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(message_queue_error, response.content)
+
+    def test_get_course_survey_results_queue_connection_error(self):
+        """
+        write doc
+        :return:
+        """
+        url = reverse(
+            'get_course_survey_results',
+            kwargs={'course_id': unicode(self.course.id)}
+        )
+
+        message_queue_error = 'Error occured. Please try again later'
+        with patch('lms.djangoapps.instructor_task.api.submit_course_survey_report') as submit_task_function:
+            error = QueueConnectionError()
+            submit_task_function.side_effect = error
+            response = self.client.post(url, {})
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(message_queue_error, response.content)
+
     def test_get_students_features(self):
         """
         Test that some minimum of information is formatted
@@ -3868,6 +3913,22 @@ class TestInstructorSendEmail(SiteMixin, SharedModuleStoreTestCase, LoginEnrollm
             template_name=org_template,
             from_addr=org_email
         ).count())
+
+    def test_send_email_queue_connection_error(self):
+        """
+        write doc
+        :return:
+        """
+        url = reverse('send_email', kwargs={'course_id': self.course.id.to_deprecated_string()})
+        message_queue_error = 'Error occured. Please try again later'
+
+        with patch('lms.djangoapps.instructor_task.api.submit_bulk_course_email') as submit_task_function:
+            error = QueueConnectionError()
+            submit_task_function.side_effect = error
+            response = self.client.post(url, self.full_test_message)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(message_queue_error, response.content)
 
 
 class MockCompletionInfo(object):
@@ -5242,3 +5303,22 @@ class TestBulkCohorting(SharedModuleStoreTestCase):
         self.verify_success_on_file_content(
             'username,email,cohort\r\nfoo_username,bar_email,baz_cohort', mock_store_upload, mock_cohort_task
         )
+
+    def test_add_users_to_cohorts_queue_connection_error(self):
+        """
+        write doc
+        :return:
+        """
+
+        file_content = 'username,email,cohort\nfoo_username,bar_email,baz_cohort'
+        message_queue_error = 'Error occured. Please try again later'
+
+        self.client.login(username=self.staff_user.username, password='test')
+
+        with patch('lms.djangoapps.instructor_task.api.submit_cohort_students') as submit_task_function:
+            error = QueueConnectionError()
+            submit_task_function.side_effect = error
+            response = self.call_add_users_to_cohorts(file_content)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(message_queue_error, response.content)
