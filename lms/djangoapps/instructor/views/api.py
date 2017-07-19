@@ -160,10 +160,10 @@ def common_exceptions_400(func):
                 return JsonResponse({"error": message}, 400)
             else:
                 return HttpResponseBadRequest(message)
-        except QueueConnectionError:
-            message = _("Unable to connect to messaging queue")
+        except QueueConnectionError as err:
+            message = _(err.message)
             if use_json:
-                return JsonResponse({"error": message}, 400)
+                return JsonResponseBadRequest(message)
             else:
                 return HttpResponseBadRequest(message)
     return wrapped
@@ -1011,8 +1011,8 @@ def get_problem_responses(request, course_id):
         already_running_status = _(ALREADY_RUNNING_MESSAGE_TEMPLATE.format(report_type))
         response_payload['status'] = already_running_status
 
-    except QueueConnectionError:
-        return JsonResponseBadRequest()
+    except QueueConnectionError as error:
+        return JsonResponseBadRequest(error.message)
 
     return JsonResponse(response_payload)
 
@@ -1310,8 +1310,8 @@ def get_students_features(request, course_id, csv=False):  # pylint: disable=red
         except AlreadyRunningError:
             already_running_status = _(ALREADY_RUNNING_MESSAGE_TEMPLATE.format(report_type))
             response_payload['status'] = already_running_status
-        except QueueConnectionError:
-            return JsonResponseBadRequest()
+        except QueueConnectionError as error:
+            return JsonResponseBadRequest(error.message)
 
         return JsonResponse(response_payload)
 
@@ -1343,8 +1343,8 @@ def get_students_who_may_enroll(request, course_id):
         already_running_status = _(ALREADY_RUNNING_MESSAGE_TEMPLATE.format(report_type))
         response_payload['status'] = already_running_status
 
-    except QueueConnectionError:
-        return JsonResponseBadRequest()
+    except QueueConnectionError as error:
+        return JsonResponseBadRequest(error.message)
 
     return JsonResponse(response_payload)
 
@@ -1392,8 +1392,8 @@ def add_users_to_cohorts(request, course_id):
     except (FileValidationException, PermissionDenied) as err:
         return JsonResponse({"error": unicode(err)}, status=400)
 
-    except QueueConnectionError:
-        return JsonResponseBadRequest()
+    except QueueConnectionError as error:
+        return JsonResponseBadRequest(error.message)
 
     return JsonResponse()
 
@@ -1449,8 +1449,8 @@ def get_enrollment_report(request, course_id):
         already_running_status = _(ALREADY_RUNNING_MESSAGE_TEMPLATE.format(report_type))
         response_payload['status'] = already_running_status
 
-    except QueueConnectionError:
-        return JsonResponseBadRequest()
+    except QueueConnectionError as error:
+        return JsonResponseBadRequest(error.message)
 
     return JsonResponse(response_payload)
 
@@ -1477,8 +1477,8 @@ def get_exec_summary_report(request, course_id):
         already_running_status = _(ALREADY_RUNNING_MESSAGE_TEMPLATE.format(report_type))
         response_payload['status'] = already_running_status
 
-    except QueueConnectionError:
-        return JsonResponseBadRequest()
+    except QueueConnectionError as error:
+        return JsonResponseBadRequest(error.message)
 
     return JsonResponse(response_payload)
 
@@ -1504,8 +1504,8 @@ def get_course_survey_results(request, course_id):
         already_running_status = _(ALREADY_RUNNING_MESSAGE_TEMPLATE.format(report_type))
         response_payload['status'] = already_running_status
 
-    except QueueConnectionError:
-        return JsonResponseBadRequest()
+    except QueueConnectionError as error:
+        return JsonResponseBadRequest(error.message)
 
     return JsonResponse(response_payload)
 
@@ -1542,8 +1542,8 @@ def get_proctored_exam_results(request, course_id):
         already_running_status = _(ALREADY_RUNNING_MESSAGE_TEMPLATE.format(report_type))
         response_payload['status'] = already_running_status
 
-    except QueueConnectionError:
-        return JsonResponseBadRequest()
+    except QueueConnectionError as error:
+        return JsonResponseBadRequest(error.message)
 
     return JsonResponse(response_payload)
 
@@ -2033,12 +2033,9 @@ def reset_student_attempts(request, course_id):
             return HttpResponse(error_msg, status=500)
         response_payload['student'] = student_identifier
     elif all_students:
-        try:
-            lms.djangoapps.instructor_task.api.submit_reset_problem_attempts_for_all_students(request, module_state_key)
-            response_payload['task'] = 'created'
-            response_payload['student'] = 'All Students'
-        except QueueConnectionError:
-            return JsonResponseBadRequest()
+        lms.djangoapps.instructor_task.api.submit_reset_problem_attempts_for_all_students(request, module_state_key)
+        response_payload['task'] = 'created'
+        response_payload['student'] = 'All Students'
     else:
         return HttpResponseBadRequest()
 
@@ -2116,9 +2113,6 @@ def reset_student_attempts_for_entrance_exam(request, course_id):  # pylint: dis
     except InvalidKeyError:
         return HttpResponseBadRequest(_("Course has no valid entrance exam section."))
 
-    except QueueConnectionError:
-        return HttpResponseBadRequest(_("Error occured. Please try again."))
-
     response_payload = {'student': student_identifier or _('All Students'), 'task': 'created'}
     return JsonResponse(response_payload)
 
@@ -2179,9 +2173,6 @@ def rescore_problem(request, course_id):
         except NotImplementedError as exc:
             return HttpResponseBadRequest(exc.message)
 
-        except QueueConnectionError:
-            return JsonResponseBadRequest()
-
     elif all_students:
         try:
             lms.djangoapps.instructor_task.api.submit_rescore_problem_for_all_students(
@@ -2191,10 +2182,6 @@ def rescore_problem(request, course_id):
             )
         except NotImplementedError as exc:
             return HttpResponseBadRequest(exc.message)
-
-        except QueueConnectionError:
-            return HttpResponseBadRequest(_("Error occured. Please try again."))
-
     else:
         return HttpResponseBadRequest()
 
@@ -2252,14 +2239,10 @@ def rescore_entrance_exam(request, course_id):
         response_payload['student'] = student_identifier
     else:
         response_payload['student'] = _("All Students")
-    try:
-        lms.djangoapps.instructor_task.api.submit_rescore_entrance_exam_for_student(
-            request, entrance_exam_key, student, only_if_higher,
-        )
 
-    except QueueConnectionError:
-        return JsonResponseBadRequest()
-
+    lms.djangoapps.instructor_task.api.submit_rescore_entrance_exam_for_student(
+        request, entrance_exam_key, student, only_if_higher,
+    )
     response_payload['task'] = 'created'
     return JsonResponse(response_payload)
 
@@ -2455,8 +2438,8 @@ def export_ora2_data(request, course_id):
         already_running_status = _(ALREADY_RUNNING_MESSAGE_TEMPLATE.format(report_type))
         response_payload['status'] = already_running_status
 
-    except QueueConnectionError:
-        return JsonResponseBadRequest()
+    except QueueConnectionError as error:
+        return JsonResponseBadRequest(error.message)
 
     return JsonResponse(response_payload)
 
@@ -2482,8 +2465,8 @@ def calculate_grades_csv(request, course_id):
         already_running_status = _(ALREADY_RUNNING_MESSAGE_TEMPLATE.format(report_type))
         response_payload['status'] = already_running_status
 
-    except QueueConnectionError:
-        return JsonResponseBadRequest()
+    except QueueConnectionError as error:
+        return JsonResponseBadRequest(error.message)
 
     return JsonResponse(response_payload)
 
@@ -2513,8 +2496,8 @@ def problem_grade_report(request, course_id):
         already_running_status = _(ALREADY_RUNNING_MESSAGE_TEMPLATE.format(report_type))
         response_payload['status'] = already_running_status
 
-    except QueueConnectionError:
-        return JsonResponseBadRequest()
+    except QueueConnectionError as error:
+        return JsonResponseBadRequest(error.message)
 
     return JsonResponse(response_payload)
 
@@ -2663,8 +2646,8 @@ def send_email(request, course_id):
             'course_id': course_id.to_deprecated_string(),
             'success': True,
         }
-    except QueueConnectionError:
-        return JsonResponseBadRequest()
+    except QueueConnectionError as error:
+        return JsonResponseBadRequest(error.message)
 
     return JsonResponse(response_payload)
 
@@ -2956,8 +2939,8 @@ def start_certificate_generation(request, course_id):
             'message': message,
             'task_id': task.task_id
         }
-    except QueueConnectionError:
-        return JsonResponseBadRequest()
+    except QueueConnectionError as error:
+        return JsonResponseBadRequest(error.message)
 
     return JsonResponse(response_payload)
 
@@ -3003,8 +2986,8 @@ def start_certificate_regeneration(request, course_id):
     except AlreadyRunningError as error:
         return JsonResponse({'message': error.message}, status=400)
 
-    except QueueConnectionError:
-        return JsonResponseBadRequest()
+    except QueueConnectionError as error:
+        return JsonResponseBadRequest(error.message)
 
     return JsonResponse(response_payload)
 
@@ -3223,8 +3206,8 @@ def generate_certificate_exceptions(request, course_id, generate_for=None):
             'success': True,
             'message': _('Certificate generation started for white listed students.'),
         }
-    except QueueConnectionError:
-        return JsonResponseBadRequest()
+    except QueueConnectionError as error:
+        return JsonResponseBadRequest(error.message)
 
     return JsonResponse(response_payload)
 
@@ -3432,8 +3415,8 @@ def re_validate_certificate(request, course_key, generated_certificate):
         lms.djangoapps.instructor_task.api.generate_certificates_for_students(
             request, course_key, student_set="specific_student", specific_student_id=student.id
         )
-    except QueueConnectionError:
-        return JsonResponseBadRequest()
+    except QueueConnectionError as error:
+        return JsonResponseBadRequest(error.message)
 
 
 def validate_request_data_and_get_certificate(certificate_invalidation, course_key):
